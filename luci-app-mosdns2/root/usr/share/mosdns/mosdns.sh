@@ -11,16 +11,20 @@ logfile_path() (
 )
 
 interface_dns() (
-	peerdns=$(uci -q get network.wan.peerdns)
-	proto=$(uci -q get network.wan.proto)
-	if [ "$peerdns" = 0 ] || [ "$proto" = "static" ]; then
-		uci -q get network.wan.dns
+	if [ "$(uci -q get mosdns.config.custom_local_dns)" -eq 1 ]; then
+		uci -q get mosdns.config.local_dns
 	else
-		interface_status=$(ubus call network.interface.wan status)
-		echo $interface_status | jsonfilter -e "@['dns-server'][0]"
-		echo $interface_status | jsonfilter -e "@['dns-server'][1]"
+		peerdns=$(uci -q get network.wan.peerdns)
+		proto=$(uci -q get network.wan.proto)
+		if [ "$peerdns" = 0 ] || [ "$proto" = "static" ]; then
+			uci -q get network.wan.dns
+		else
+			interface_status=$(ubus call network.interface.wan status)
+			echo $interface_status | jsonfilter -e "@['dns-server'][0]"
+			echo $interface_status | jsonfilter -e "@['dns-server'][1]"
+		fi
+		[ $? -ne 0 ] && echo "119.29.29.29"
 	fi
-	[ $? -ne 0 ] && echo "119.29.29.29"
 )
 
 ad_block() (
@@ -39,9 +43,9 @@ ad_block() (
 
 adlist_update() (
 	ad_source=$(uci -q get mosdns.config.ad_source)
-	[ "$ad_source" = "geosite.dat" ] && exit 0
+	[ "$ad_source" = "geosite.dat" ] || [ -z "$ad_source" ] && exit 0
 	AD_TMPDIR=$(mktemp -d) || exit 1
-	if [[ "$ad_source" =~ "^https://raw.githubusercontent.com" ]]; then
+	if echo "$ad_source" | grep -Eq "^https://raw.githubusercontent.com" ; then
 		google_status=$(curl -I -4 -m 3 -o /dev/null -s -w %{http_code} http://www.google.com/generate_204)
 		[ "$google_status" -ne "204" ] && mirror="https://ghproxy.com/"
 	fi

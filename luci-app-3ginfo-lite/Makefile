@@ -7,10 +7,10 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-3ginfo-lite
 LUCI_TITLE:=LuCI Support for 3ginfo-lite
-LUCI_DESCRIPTION:=Luci interface for the 3ginfo-lite. The package allows you to view the parameters of the mobile internet connection.
+LUCI_DESCRIPTION:=LuCI interface for the 3ginfo-lite. The package allows you to view the parameters of the mobile internet connection.
 LUCI_PKGARCH:=all
 LUCI_DEPENDS:=+sms-tool +comgt
-PKG_VERSION:=1.0.31-20221121
+PKG_VERSION:=1.0.33-20221207
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
